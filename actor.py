@@ -6,7 +6,7 @@ firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
-doc = [{
+docs = [{
   "name": "沈安妮",
   "birth": "2001",
   "role": "靜宜大學資管系學生"
@@ -26,5 +26,8 @@ doc = [{
   "role": "民和黨籍現任立法院院長"
 }]
 
-doc_ref = db.collection("人選之人演員名單").document("anni0921")
-doc_ref.set(doc)
+#doc_ref = db.collection("人選之人演員名單").document("anni0921")
+#doc_ref.set(doc)
+collection_ref = db.collection("人選之人演員名單")
+for doc in docs:
+  collection_ref.add(doc)
