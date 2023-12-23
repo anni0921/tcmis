@@ -1,5 +1,12 @@
 from flask import Flask,render_template,request
 from datetime import datetime
+import firebase_admin
+
+from firebase_admin import credentials, firestore
+
+cred = credentials.Certificate("serviceAccountKey.json")
+
+firebase_admin.initialize_app(cred)
 
 app = Flask(__name__)
 
@@ -10,6 +17,10 @@ def index():
    homepage += "<a href=/today>顯示日期時間</a><br>"
    homepage += "<a href=/welcome?nick=tcyang>傳送使用者暱稱</a><br>"
    homepage += "<a href=/about>安妮簡介網頁</a><br>"
+
+   homepage += "<a href=/allbooks>全部图书</a><br>"
+   homepage += "<a href=/about>根据书名关键字查询图书</a><br>"
+
    return homepage
 
 @app.route("/mis")
@@ -35,6 +46,14 @@ def account():
       return result
    else:
       return render_template("account.html")
+
+@app.route("/allbooks")
+def allbooks():
+   db = firestore.client()
+   doc_ref = db.document("圖書精選")
+   doc = doc_ref.get()
+   result = doc.to_dict()
+   return result
 
 if __name__ == "__main__":
    app.run()
