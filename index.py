@@ -1,12 +1,17 @@
-from flask import Flask,render_template,request
-from datetime import datetime
 import firebase_admin
-
 from firebase_admin import credentials, firestore
-
 cred = credentials.Certificate("serviceAccountKey.json")
-
 firebase_admin.initialize_app(cred)
+
+from flask import Flask, render_template, request, make_response, jsonify
+from datetime import datetime,timezone, timedelta
+
+import requests, json
+from bs4 import BeautifulSoup
+
+import openai
+import os
+
 
 app = Flask(__name__)
 
@@ -75,7 +80,7 @@ def search():
         return Result
     else:
         return render_template("cond.html")
-      
+
 
 @app.route("/books1")
 def books1():
