@@ -17,7 +17,9 @@ def index():
    homepage += "<a href=/today>顯示日期時間</a><br>"
    homepage += "<a href=/welcome?nick=安妮>傳送使用者暱稱</a><br>"
    homepage += "<a href=/about>安妮簡介網頁</a><br>"
-
+   homepage += "<a href=/account>網頁表單輸入帳密傳值</a><br><br>"
+   homepage += "<a href=/read>人選之人演員</a><br>"
+   homepage += "<a href=/search>根據角色查詢演員</a><br><br>"
    homepage += "<a href=/books>精選圖書列表</a><br>"
    homepage += "<a href=/query>書名查詢</a><br><br>"
 
@@ -46,6 +48,34 @@ def account():
       return result
    else:
       return render_template("account.html")
+
+@app.route("/read")
+def read():
+    Result = ""
+    db = firestore.client()
+    collection_ref = db.collection("人選之人─造浪者")    
+    docs = collection_ref.get()    
+    for doc in docs:         
+        Result += "文件內容：{}".format(doc.to_dict()) + "<br>"    
+    return Result
+
+
+@app.route("/search", methods=["GET", "POST"])
+def search():
+    if request.method == "POST":
+        keyword = request.form["keyword"]
+        Result = "您輸入的角色關鍵字是：" + keyword + "，查詢結果如下：<br><br>"
+        db = firestore.client()
+        collection_ref = db.collection("人選之人─造浪者")    
+        docs = collection_ref.order_by("birth").get()    
+        for doc in docs:
+            x = doc.to_dict()
+            if keyword in x["role"]:    
+                Result += x["name"] + "在劇中扮演" + x["role"] + "，出生於西元" + str(x["birth"]) + "<br>" 
+        return Result
+    else:
+        return render_template("cond.html")
+      
 
 @app.route("/books1")
 def books1():
