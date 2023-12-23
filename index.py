@@ -112,6 +112,7 @@ def books():
 
 @app.route("/query", methods=["GET", "POST"])
 def query():
+    print(request.json)
     if request.method == "POST":
         keyword = request.form["keyword"]
         result = "您輸入的關鍵字是：" + keyword
