@@ -93,11 +93,11 @@ def books():
         Result += "<img src=" + bk["cover"] + "> </img><br><br>"  
     return Result
 
-@app.route("/query/<keyword>", methods=["POST"])
-def query(keyword):
+@app.route("/query", methods=["GET","POST"])
+def query():
     #print(request)
     if request.method == "POST":
-        #keyword = request.form["keyword"]
+        keyword = request.form["keyword"]
         result = "您輸入的關鍵字是：" + keyword
 
         Result = ""
@@ -117,4 +117,4 @@ def query(keyword):
 
 
 #if __name__ == "__main__":
-#   app.run()
+#  app.run()
