@@ -18,8 +18,8 @@ def index():
    homepage += "<a href=/welcome?nick=tcyang>傳送使用者暱稱</a><br>"
    homepage += "<a href=/about>安妮簡介網頁</a><br>"
 
-   homepage += "<a href=/allbooks>全部图书</a><br>"
-   homepage += "<a href=/about>根据书名关键字查询图书</a><br>"
+   homepage += "<a href=/books>精選圖書列表</a><br>"
+   homepage += "<a href=/query>書名查詢</a><br><br>"
 
    return homepage
 
@@ -47,13 +47,33 @@ def account():
    else:
       return render_template("account.html")
 
-@app.route("/allbooks")
-def allbooks():
-   db = firestore.client()
-   doc_ref = db.document("圖書精選")
-   doc = doc_ref.get()
-   result = doc.to_dict()
-   return result
+@app.route("/books1")
+def books1():
+    Result = ""
+    db = firestore.client()
+    collection_ref = db.collection("圖書精選")    
+    docs = collection_ref.order_by("anniversary").get()    
+    for doc in docs:
+        bk = doc.to_dict()
+        Result += "書名：<a href=" + bk["url"] + ">" + bk["title"] + "</a><br>"
+        Result += "作者：" + bk["author"] + "<br>"
+        Result += str(bk["anniversary"]) + "週年<br>"
+        Result += "<img src=" + bk["cover"] + "></img><br><br>" 
+    return Result
+
+@app.route("/books")
+def books():
+    Result = ""
+    db = firestore.client()
+    collection_ref = db.collection("圖書精選")    
+    docs = collection_ref.get()    
+    for doc in docs:
+        bk = doc.to_dict()        
+        Result += "書名：<a href=" + bk["url"] + ">" + bk["title"] + "</a><br>"  
+        Result += "作者：" + bk["author"] + "<br>" 
+        Result += str(bk["anniversary"]) + "週年紀念版<br>"
+        Result += "<img src=" + bk["cover"] + "> </img><br><br>"  
+    return Result
 
 if __name__ == "__main__":
    app.run()
