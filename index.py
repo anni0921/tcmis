@@ -185,7 +185,60 @@ def ssearch_movie():
     else:  
         return render_template("input.html")
     
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    # build a request object
+    req = request.get_json(force=True)
+    # fetch queryResult from json
+    action =  req["queryResult"]["action"]
+    msg =  req["queryResult"]["queryText"]
+    info = "動作：" + action + "； 查詢內容：" + msg
+    return make_response(jsonify({"fulfillmentText": info}))
 
+
+
+@app.route("/webhook2", methods=["POST"])
+def webhook2():
+    # build a request object
+    req = request.get_json(force=True)
+    # fetch queryResult from json
+    action =  req["queryResult"]["action"]
+    #msg =  req["queryResult"]["queryText"]
+    #info = "動作：" + action + "； 查詢內容：" + msg
+    if (action == "rateChoice"):
+        rate =  req["queryResult"]["parameters"]["rate"]
+        info = "您選擇的電影分級是：" + rate
+    return make_response(jsonify({"fulfillmentText": info}))
+
+
+@app.route("/webhook3", methods=["POST"])
+def webhook3():
+    # build a request object
+    req = request.get_json(force=True)
+    # fetch queryResult from json
+    action =  req["queryResult"]["action"]
+    #msg =  req["queryResult"]["queryText"]
+    #info = "動作：" + action + "； 查詢內容：" + msg
+    if (action == "rateChoice"):
+        rate =  req["queryResult"]["parameters"]["rate"]
+        info = "我是沈安妮開發的電影聊天機器人,您選擇的電影分級是：" + rate + "，相關電影：\n"
+
+        db = firestore.client()
+        collection_ref = db.collection("電影含分級")
+        docs = collection_ref.get()
+        result = ""
+        for doc in docs:
+            dict = doc.to_dict()
+            if rate in dict["rate"]:
+                result += "片名：" + dict["title"] + "\n"
+                result += "介紹：" + dict["hyperlink"] + "\n\n"
+        info += result
+    return make_response(jsonify({"fulfillmentText": info}))
+
+
+@app.route("/movieBot")
+def movieBot():
+    return render_template("Movie.html")
 
 
 
