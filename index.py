@@ -294,6 +294,89 @@ def webhook3():
         info += result
     return make_response(jsonify({"fulfillmentText": info}))
 
+@app.route("/webhook6", methods=["POST"])
+def webhook6():
+    req = request.get_json(force=True)
+    action =  req["queryResult"]["action"]
+    if (action == "rateChoice"):
+        rate =  req["queryResult"]["parameters"]["rate"]
+        info = "我是沈安妮開發的電影聊天機器人，您選擇的電影分級是：" + rate + "，相關電影：\n"
+
+        db = firestore.client()
+        collection_ref = db.collection("電影含分級")
+        docs = collection_ref.get()
+        result = ""
+        for doc in docs:
+            dict = doc.to_dict()
+            if rate in dict["rate"]:
+                result += "片名：" + dict["title"] + "\n"
+                result += "介紹：" + dict["hyperlink"] + "\n\n"
+        info += result
+    elif (action == "MovieDetail"):
+        question =  req.get("queryResult").get("parameters").get("filmq")
+        keyword =  req.get("queryResult").get("parameters").get("any")
+        info = "我是沈安妮開發的電影聊天機器人，您要查詢電影的" + question + "，關鍵字是：" + keyword + "\n\n"
+
+        if (question == "片名"):
+            db = firestore.client()
+            collection_ref = db.collection("電影含分級")
+            docs = collection_ref.get()
+            found = False
+            for doc in docs:
+                dict = doc.to_dict()
+                if keyword in dict["title"]:
+                    found = True 
+                    info += "片名：" + dict["title"] + "\n"
+                    info += "海報：" + dict["picture"] + "\n"
+                    info += "影片介紹：" + dict["hyperlink"] + "\n"
+                    info += "片長：" + dict["showLength"] + " 分鐘\n"
+                    info += "分級：" + dict["rate"] + "\n" 
+                    info += "上映日期：" + dict["showDate"] + "\n\n"
+            if not found:
+                info += "很抱歉，目前無符合這個關鍵字的相關電影喔"
+
+    elif (action == "Weather"):
+        city =  req.get("queryResult").get("parameters").get("city")
+        info = "為您查詢 " + city + " 最近36小時的天氣\n\n"
+
+        token = "rdec-key-123-45678-011121314"
+        url = "https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=" + token + "&format=JSON&locationName=" + str(city)
+        Data = requests.get(url)
+
+        sTime = json.loads(Data.text)["records"]["location"][0]["weatherElement"][0]["time"][0]["startTime"]
+        eTime = json.loads(Data.text)["records"]["location"][0]["weatherElement"][0]["time"][0]["endTime"]
+        Weather = json.loads(Data.text)["records"]["location"][0]["weatherElement"][0]["time"][0]["parameter"]["parameterName"]
+        Rain = json.loads(Data.text)["records"]["location"][0]["weatherElement"][1]["time"][0]["parameter"]["parameterName"]
+        Min = json.loads(Data.text)["records"]["location"][0]["weatherElement"][2]["time"][0]["parameter"]["parameterName"]
+        Max = json.loads(Data.text)["records"]["location"][0]["weatherElement"][4]["time"][0]["parameter"]["parameterName"]
+        CT = json.loads(Data.text)["records"]["location"][0]["weatherElement"][3]["time"][0]["parameter"]["parameterName"]
+        info += sTime + "～" + eTime + "\n"
+        info += Weather + "，降雨機率：" + str(Rain) + "%" + "，氣溫：" + str(Min) + "～" + str(Max) + "度，" + CT + "\n\n"
+
+
+        sTime = json.loads(Data.text)["records"]["location"][0]["weatherElement"][0]["time"][1]["startTime"]
+        eTime = json.loads(Data.text)["records"]["location"][0]["weatherElement"][0]["time"][1]["endTime"]
+        Weather = json.loads(Data.text)["records"]["location"][0]["weatherElement"][0]["time"][1]["parameter"]["parameterName"]
+        Rain = json.loads(Data.text)["records"]["location"][0]["weatherElement"][1]["time"][1]["parameter"]["parameterName"]
+        Min = json.loads(Data.text)["records"]["location"][0]["weatherElement"][2]["time"][1]["parameter"]["parameterName"]
+        Max = json.loads(Data.text)["records"]["location"][0]["weatherElement"][4]["time"][1]["parameter"]["parameterName"]
+        CT = json.loads(Data.text)["records"]["location"][0]["weatherElement"][3]["time"][1]["parameter"]["parameterName"]
+        info += sTime + "～" + eTime + "\n"
+        info += Weather + "，降雨機率：" + str(Rain) + "%" + "，氣溫：" + str(Min) + "～" + str(Max) + "度，" + CT + "\n\n"
+
+        sTime = json.loads(Data.text)["records"]["location"][0]["weatherElement"][0]["time"][2]["startTime"]
+        eTime = json.loads(Data.text)["records"]["location"][0]["weatherElement"][0]["time"][2]["endTime"]
+        Weather = json.loads(Data.text)["records"]["location"][0]["weatherElement"][0]["time"][2]["parameter"]["parameterName"]
+        Rain = json.loads(Data.text)["records"]["location"][0]["weatherElement"][1]["time"][2]["parameter"]["parameterName"]
+        Min = json.loads(Data.text)["records"]["location"][0]["weatherElement"][2]["time"][2]["parameter"]["parameterName"]
+        Max = json.loads(Data.text)["records"]["location"][0]["weatherElement"][4]["time"][2]["parameter"]["parameterName"]
+        CT = json.loads(Data.text)["records"]["location"][0]["weatherElement"][3]["time"][2]["parameter"]["parameterName"]
+        info += sTime + "～" + eTime + "\n"
+        info += Weather + "，降雨機率：" + str(Rain) + "%" + "，氣溫：" + str(Min) + "～" + str(Max) + "度，" + CT
+
+    return make_response(jsonify({"fulfillmentText": info}))
+
+
 
 @app.route("/movieBot")
 def movieBot():
